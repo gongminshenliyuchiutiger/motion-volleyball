@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>體感排球遊戲系統</title>
+<title>體感打排球遊戲系統</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
     :root {
@@ -67,7 +67,11 @@
         backdrop-filter: blur(15px); pointer-events: auto;
     }
     .panel h1 { 
-        margin: 0 0 20px; font-size: 2.8rem; font-style: italic; letter-spacing: 2px;
+        margin: 0 0 20px; 
+        /* Responsive Single Line Logic */
+        font-size: clamp(20px, 7vw, 40px); 
+        white-space: nowrap; 
+        font-style: italic; letter-spacing: 1px;
         text-shadow: 3px 3px 0px var(--c-pink), -3px -3px 0px var(--c-cyan);
     }
     .panel p { font-size: 1.2rem; margin-bottom: 25px; color: #ddd; }
@@ -123,14 +127,14 @@
         <div class="footer">Copyright © Liyuchiutiger Gongminshen</div>
 
         <div class="panel" id="p-start">
-            <h1>體感排球遊戲系統</h1>
+            <h1>體感打排球遊戲系統</h1>
             <p>請選擇遊戲模式</p>
             <button class="btn btn-solo" onclick="initGame('single')"><i class="fas fa-user"></i> 單人挑戰</button>
             <button class="btn btn-vs" onclick="initGame('multi')"><i class="fas fa-user-friends"></i> 雙人對戰</button>
         </div>
 
         <div class="panel hidden" id="p-end">
-            <h1 id="end-title" style="font-size: 3.5rem;">GAME OVER</h1>
+            <h1 id="end-title" style="font-size: clamp(2.5rem, 8vw, 3.5rem);">GAME OVER</h1>
             <p id="end-desc">SCORE</p>
             <h2 id="end-score" style="font-size: 5rem; margin: 10px 0; text-shadow:0 0 30px #fff;">0</h2>
             <button class="btn btn-restart" onclick="restartGame()">再玩一次</button>
@@ -228,7 +232,6 @@
                 ctx.translate(this.x, this.y); ctx.rotate(this.rot);
                 ctx.beginPath(); ctx.arc(0,0,this.r,0,Math.PI*2); ctx.clip();
                 
-                // Draw Pattern
                 ctx.fillStyle="#fff"; ctx.fill();
                 const colors = ["#ff00de", "#00fff2", "#eeff00"];
                 const paths = [
@@ -244,7 +247,6 @@
                     ctx.fill();
                 });
                 
-                // Overlay & Glow
                 ctx.restore(); ctx.save(); ctx.translate(this.x, this.y);
                 ctx.beginPath(); ctx.arc(0,0,this.r,0,Math.PI*2);
                 ctx.lineWidth=3; ctx.strokeStyle="rgba(255,255,255,0.8)"; 
@@ -287,7 +289,6 @@
             }
         }
 
-        // Functions
         function spawnParticles(x, y, count, cols, isConfetti) { for(let i=0; i<count; i++) particles.push(new Particle(x, y, cols, isConfetti)); }
         
         function resize() {
@@ -324,7 +325,6 @@
         function handleFloor() {
             if(roundOver) return;
             roundOver = true; shake = 10;
-
             if(gameMode === 'single') {
                 lives--; sfx.fail(); spawnParticles(ball.x, h-20, 20, ['#ff00de']); updateLives();
                 if(lives <= 0) gameOver(); else setTimeout(() => ball.reset(), 800);
@@ -333,7 +333,6 @@
                 winner === 1 ? p1Score++ : p2Score++;
                 spawnParticles(ball.x, h-20, 30, [winner===1?'#00fff2':'#ff00de', '#fff']);
                 sfx.point(); updateScore();
-                
                 if(p1Score >= CFG.winTarget || p2Score >= CFG.winTarget) gameOver();
                 else setTimeout(() => ball.reset(winner===1?'right':'left'), 1000);
             }
@@ -358,13 +357,10 @@
 
         function loop() {
             if(!gameActive && particles.length===0) return;
-            
-            // Motion Detection
             if(vid.videoWidth) {
                 tmpCtx.drawImage(vid, 0, 0, CFG.cw, ch);
                 const d = tmpCtx.getImageData(0,0,CFG.cw,ch).data;
                 mCtx.clearRect(0,0,w,h); mCtx.fillStyle = "rgba(0, 255, 242, 0.15)";
-                
                 if(prevData) {
                     for(let y=0; y<ch; y++) {
                         for(let x=0; x<CFG.cw; x++) {
@@ -381,7 +377,6 @@
                 prevData = d;
             }
 
-            // Draw Game
             gCtx.clearRect(0,0,w,h); gCtx.save();
             if(shake > 0) { gCtx.translate((Math.random()-0.5)*shake, (Math.random()-0.5)*shake); shake *= 0.9; if(shake<0.5) shake=0; }
             if(gameMode === 'multi') net.draw(gCtx);
